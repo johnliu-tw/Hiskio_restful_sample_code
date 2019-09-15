@@ -1,10 +1,8 @@
 from resources.user import User, Users
-import flask
-from flask import request
-from flask import jsonify
-from flask_restful import Api
-from flask_restful import Resource
+from flask import jsonify, request, Blueprint
+from flask_restful import Api, Resource
 import pymysql
+import flask
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -13,6 +11,18 @@ api = Api(app)
 
 api.add_resource(User, "/user/<id>")
 api.add_resource(Users, "/users")
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(error):
+    status_code = 500
+    if type(error).__name__ == "NotFound":
+        status_code = 404
+    elif type(error).__name__ == "TypeError":
+        status_code = 500
+    return {
+        'code': status_code,
+        'msg': type(error).__name__
+    }
 
 @app.before_request
 def auth():
@@ -29,7 +39,6 @@ def auth():
 @app.route("/", methods=["GET"])
 def home():
     return "Hello World"
-
 
 
 if __name__ == "__main__":
