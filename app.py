@@ -14,6 +14,17 @@ api = Api(app)
 api.add_resource(User, "/user/<id>")
 api.add_resource(Users, "/users")
 
+@app.before_request
+def auth():
+    token = request.headers.get('auth')
+    print(token)
+    if token == '567':
+        pass
+    else:
+        return {
+            'code': 401,
+            'msg': 'invalid token'
+        }
 
 @app.route("/", methods=["GET"])
 def home():
