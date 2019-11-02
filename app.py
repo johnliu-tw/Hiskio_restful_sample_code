@@ -1,4 +1,5 @@
 from resources.user import User, Users
+from resources.account import Account, Accounts
 from flask import jsonify, request
 from flask_restful import Api, Resource
 import pymysql
@@ -11,6 +12,8 @@ api = Api(app)
 
 api.add_resource(User, "/user/<id>")
 api.add_resource(Users, "/users")
+api.add_resource(Account, "/account/<id>")
+api.add_resource(Accounts, "/accounts")
 
 @app.errorhandler(Exception)
 def handle_unexpected_error(error):
@@ -39,6 +42,9 @@ def auth():
 def home():
     return "Hello World"
 
+# @app.route('/user/<id>/item')
+# def get_item_in_store(id):
+#     return jsonify (id)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
