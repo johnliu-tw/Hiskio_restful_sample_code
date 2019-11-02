@@ -1,5 +1,5 @@
 from resources.user import User, Users
-from flask import jsonify, request, Blueprint
+from flask import jsonify, request
 from flask_restful import Api, Resource
 import pymysql
 import flask
@@ -27,7 +27,6 @@ def handle_unexpected_error(error):
 @app.before_request
 def auth():
     token = request.headers.get('auth')
-    print(token)
     if token == '567':
         pass
     else:

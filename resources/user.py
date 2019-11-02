@@ -1,5 +1,4 @@
-from flask_restful import Resource
-from flask_restful import reqparse
+from flask_restful import Resource, reqparse
 from flask import jsonify
 import pymysql
 import json
@@ -17,8 +16,6 @@ parser.add_argument("birth")
 parser.add_argument("note")
 
 response = {"code": 200, "msg": "success"}
-
-
 class User(Resource):
     def db_init(self):
         db = pymysql.connect(DB_HOST, DB_USER, DB_PASSWORD, DB_SCHEMA)
@@ -33,9 +30,9 @@ class User(Resource):
         user = cursor.fetchall()
         db.close()
         response["data"] = user
-        return response
+        return jsonify(response)
 
-    def put(self, id):
+    def patch(self, id):
         db, cursor = self.db_init()
         arg = parser.parse_args()
         user = {
@@ -46,8 +43,6 @@ class User(Resource):
         }
         query = []
         for key, value in user.items():
-            print(key)
-            print(value)
             if value != None:
                 query.append(key + " = " + " '{}' ".format(value))
         query = ",".join(query)
@@ -59,7 +54,7 @@ class User(Resource):
 
         response["result"] = True if result == 1 else False
 
-        return response
+        return jsonify(response)
 
     def delete(self, id):
         db, cursor = self.db_init()
@@ -69,7 +64,7 @@ class User(Resource):
         db.close()
 
         response["result"] = True if result == 1 else False
-        return response
+        return jsonify(response)
 
 
 class Users(Resource):
@@ -89,7 +84,7 @@ class Users(Resource):
             user["birth"] = user["birth"].strftime("%Y-%m-%d")
 
         response["data"] = users
-        return response
+        return jsonify(response)
 
     def post(self):
         db, cursor = self.db_init()
@@ -110,4 +105,4 @@ class Users(Resource):
         db.close()
         response["result"] = True if result == 1 else False
 
-        return response
+        return jsonify(response)
