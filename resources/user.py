@@ -24,7 +24,7 @@ class User(Resource):
 
     def get(self, id):
         db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.users Where id = {}""".format(id)
+        sql = """Select * FROM flask_demo.users Where id = {} and deleted is not  True""".format(id)
         cursor.execute(sql)
         db.commit()
         user = cursor.fetchall()
@@ -47,7 +47,7 @@ class User(Resource):
                 query.append(key + " = " + " '{}' ".format(value))
         query = ",".join(query)
 
-        sql = """Update flask_demo.users Set {} Where id = {}""".format(query, id)
+        sql = """Update flask_demo.users Set {} Where id = {} and deleted is not  True""".format(query, id)
         result = cursor.execute(sql)
         db.commit()
         db.close()
@@ -58,7 +58,7 @@ class User(Resource):
 
     def delete(self, id):
         db, cursor = self.db_init()
-        sql = """Delete FROM flask_demo.users Where id = {}""".format(id)
+        sql = """Update flask_demo.users Set deleted = True Where id = {}""".format(id)
         result = cursor.execute(sql)
         db.commit()
         db.close()
@@ -75,7 +75,7 @@ class Users(Resource):
 
     def get(self):
         db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.users """
+        sql = """Select * FROM flask_demo.users where deleted is not True"""
         cursor.execute(sql)
         db.commit()
         users = cursor.fetchall()
