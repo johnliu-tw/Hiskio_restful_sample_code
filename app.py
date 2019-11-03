@@ -15,17 +15,24 @@ api.add_resource(Users, "/users")
 api.add_resource(Account, "/account/<id>")
 api.add_resource(Accounts, "/accounts")
 
-@app.errorhandler(Exception)
-def handle_unexpected_error(error):
-    status_code = 500
-    if type(error).__name__ == "NotFound":
-        status_code = 404
-    elif type(error).__name__ == "TypeError":
-        status_code = 500
-    return {
-        'code': status_code,
-        'msg': type(error).__name__
-    }
+DB_HOST = "localhost"
+DB_USER = "root"
+DB_PASSWORD = "password"
+DB_SCHEMA = "flask_demo"
+
+response = {"code": 200, "msg": "success"}
+
+# @app.errorhandler(Exception)
+# def handle_unexpected_error(error):
+#     status_code = 500
+#     if type(error).__name__ == "NotFound":
+#         status_code = 404
+#     elif type(error).__name__ == "TypeError":
+#         status_code = 500
+#     return {
+#         'code': status_code,
+#         'msg': type(error).__name__
+#     }
 
 @app.before_request
 def auth():
@@ -42,9 +49,47 @@ def auth():
 def home():
     return "Hello World"
 
-# @app.route('/user/<id>/item')
-# def get_item_in_store(id):
-#     return jsonify (id)
+@app.route('/account/<account_number>/deposit', methods=["POST"])
+def deposit(account_number):
+    db, cursor, account = get_account(account_number)
+    money = request.values['money']
+    balance = account['balance'] + int(money)
+
+    sql = """Update flask_demo.accounts Set balance = {} Where account_number = {} and deleted is not True""".format(balance, account_number)
+    result = cursor.execute(sql)
+    db.commit()
+    db.close()
+    response["result"] = True if result == 1 else False
+
+    return jsonify(response)
+
+@app.route('/account/<account_number>/withdraw', methods=["POST"])
+def withdraw(account_number):
+    db, cursor, account = get_account(account_number)
+    money = request.values['money']
+    balance = account['balance'] - int(money)
+    if balance < 0:
+        response["msg"] = 'money not enough'
+        response["code"] = 400
+        return jsonify(response)
+    else:
+        sql = """Update flask_demo.accounts Set balance = {} Where account_number = {} and deleted is not True""".format(balance, account_number)
+        result = cursor.execute(sql)
+        db.commit()
+        db.close()
+        response["result"] = True if result == 1 else False
+
+    return jsonify(response)
+
+def get_account(account_number):
+    db = pymysql.connect(DB_HOST, DB_USER, DB_PASSWORD, DB_SCHEMA)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+
+    sql = """Select * FROM flask_demo.accounts Where account_number = {} and deleted is not True""".format(account_number)
+    cursor.execute(sql)
+    db.commit()
+    return db, cursor, cursor.fetchone()    
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=3333)
