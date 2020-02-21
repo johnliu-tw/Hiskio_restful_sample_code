@@ -2,11 +2,14 @@ from flask_restful import Resource, reqparse
 from flask import jsonify
 import pymysql
 import json
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "password"
-DB_SCHEMA = "flask_demo"
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_SCHEMA = os.getenv("DB_SCHEMA")
 
 
 parser = reqparse.RequestParser()
@@ -24,7 +27,7 @@ class User(Resource):
 
     def get(self, id):
         db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.users Where id = {} and deleted is not  True""".format(id)
+        sql = """Select * FROM flask_demo.users Where id = {} and deleted is not True""".format(id)
         cursor.execute(sql)
         db.commit()
         user = cursor.fetchall()

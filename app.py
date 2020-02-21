@@ -4,6 +4,14 @@ from flask import jsonify, request
 from flask_restful import Api, Resource
 import pymysql
 import flask
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_SCHEMA = os.getenv("DB_SCHEMA")
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -15,25 +23,22 @@ api.add_resource(Users, "/users")
 api.add_resource(Account, "/account/<id>")
 api.add_resource(Accounts, "/accounts")
 
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "password"
-DB_SCHEMA = "flask_demo"
-
 response = {"code": 200, "msg": "success"}
 
-# @app.errorhandler(Exception)
-# def handle_unexpected_error(error):
-#     status_code = 500
-#     if type(error).__name__ == "NotFound":
-#         status_code = 404
-#     elif type(error).__name__ == "TypeError":
-#         status_code = 500
-#     return {
-#         'code': status_code,
-#         'msg': type(error).__name__
-#     }
+# 管理所有的錯誤，讓回傳的錯誤訊息不包含程式碼和提示
+@app.errorhandler(Exception)
+def handle_unexpected_error(error):
+    status_code = 500
+    if type(error).__name__ == "NotFound":
+        status_code = 404
+    elif type(error).__name__ == "TypeError":
+        status_code = 500
+    return {
+        'code': status_code,
+        'msg': type(error).__name__
+    }
 
+# 簡單的驗證授權機制
 @app.before_request
 def auth():
     token = request.headers.get('auth')
@@ -49,6 +54,7 @@ def auth():
 def home():
     return "Hello World"
 
+# 客製化的 route 路由 endpoint 
 @app.route('/account/<account_number>/deposit', methods=["POST"])
 def deposit(account_number):
     db, cursor, account = get_account(account_number)
