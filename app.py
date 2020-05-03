@@ -5,6 +5,7 @@ from flask_restful import Api, Resource
 import pymysql
 import flask
 import os
+import jwt
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -42,7 +43,9 @@ def handle_unexpected_error(error):
 @app.before_request
 def auth():
     token = request.headers.get('auth')
-    if token == '567':
+    user_id = request.args.get('user_id', None)
+    valid_token = jwt.encode({'user_id': user_id}, 'password', algorithm='HS256').decode('utf-8')
+    if token == valid_token:
         pass
     else:
         return {
