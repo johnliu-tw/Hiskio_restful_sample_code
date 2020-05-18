@@ -26,7 +26,7 @@ class Account(Resource):
 
     def get(self, id):
         db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.accounts Where id = {} and deleted is not  True""".format(id)
+        sql = """Select * FROM api.accounts Where id = {} and deleted is not  True""".format(id)
         cursor.execute(sql)
         db.commit()
         account = cursor.fetchall()
@@ -47,7 +47,7 @@ class Account(Resource):
                 query.append(key + " = " + " '{}' ".format(value))
         query = ",".join(query)
 
-        sql = """Update flask_demo.accounts Set {} Where id = {} and deleted is not  True""".format(query, id)
+        sql = """Update api.accounts Set {} Where id = {} and deleted is not  True""".format(query, id)
         result = cursor.execute(sql)
         db.commit()
         db.close()
@@ -58,7 +58,7 @@ class Account(Resource):
 
     def delete(self, id):
         db, cursor = self.db_init()
-        sql = """Update flask_demo.accounts Set deleted = True Where id = {}""".format(id)
+        sql = """Update api.accounts Set deleted = True Where id = {}""".format(id)
         result = cursor.execute(sql)
         db.commit()
         db.close()
@@ -75,7 +75,7 @@ class Accounts(Resource):
 
     def get(self):
         db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.accounts where deleted is not True"""
+        sql = """Select * FROM api.accounts where deleted is not True"""
         cursor.execute(sql)
         db.commit()
         accounts = cursor.fetchall()
@@ -92,7 +92,7 @@ class Accounts(Resource):
             "account_number": arg["account_number"],
             "user_id": arg["user_id"]
         }
-        sql = """Insert into flask_demo.accounts 
+        sql = """Insert into api.accounts 
                 (balance, account_number, user_id) 
                 values('{}', '{}', '{}')""".format(
             account["balance"], account["account_number"], account["user_id"]

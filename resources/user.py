@@ -4,6 +4,8 @@ import pymysql
 import json
 import os
 from dotenv import load_dotenv
+from server import db
+from models import UserModel
 load_dotenv()
 
 DB_HOST = os.getenv("DB_HOST")
@@ -26,47 +28,45 @@ class User(Resource):
         return db, cursor
 
     def get(self, id):
-        db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.users Where id = {} and deleted is not True""".format(id)
-        cursor.execute(sql)
-        db.commit()
-        user = cursor.fetchall()
-        db.close()
-        response["data"] = user
-        return jsonify(response)
+        # db, cursor = self.db_init()
+        # sql = """Select * FROM flask_demo.users Where id = {} and deleted is not True""".format(id)
+        # cursor.execute(sql)
+        # db.commit()
+        # user = cursor.fetchall()
+        # db.close()
+        user = UserModel.query.get(id)
+        return jsonify({'data': user.serialize()})
 
     def patch(self, id):
-        db, cursor = self.db_init()
         arg = parser.parse_args()
-        user = {
-            "name": arg["name"],
-            "gender": arg["gender"],
-            "birth": arg["birth"],
-            "note": arg["note"],
-        }
-        query = []
-        for key, value in user.items():
-            if value != None:
-                query.append(key + " = " + " '{}' ".format(value))
-        query = ",".join(query)
+        # user = {
+        #     "name": arg["name"],
+        #     "gender": arg["gender"],
+        #     "birth": arg["birth"],
+        #     "note": arg["note"],
+        # }
+        # query = []
+        # for key, value in user.items():
+        #     if value != None:
+        #         query.append(key + " = " + "'{}'".format(value))
+        # query = ", ".join(query)
 
-        sql = """Update flask_demo.users Set {} Where id = {} and deleted is not  True""".format(query, id)
-        result = cursor.execute(sql)
-        db.commit()
-        db.close()
+        user = UserModel.query.filter_by(id=id, deleted=None).first()
+        if arg['name'] is not None:
+            user.name = arg['name']
+        db.session.commit()
 
-        response["result"] = True if result == 1 else False
+        response["result"] = True
 
         return jsonify(response)
 
     def delete(self, id):
-        db, cursor = self.db_init()
-        sql = """Update flask_demo.users Set deleted = True Where id = {}""".format(id)
-        result = cursor.execute(sql)
-        db.commit()
-        db.close()
+        # db, cursor = self.db_init()
+        user = UserModel.query.filter_by(id=id, deleted=None).first()
+        db.session.delete(user)
+        db.session.commit()
 
-        response["result"] = True if result == 1 else False
+        response["result"] = True
         return jsonify(response)
 
 
@@ -77,20 +77,10 @@ class Users(Resource):
         return db, cursor
 
     def get(self):
-        db, cursor = self.db_init()
-        sql = """Select * FROM flask_demo.users where deleted is not True"""
-        cursor.execute(sql)
-        db.commit()
-        users = cursor.fetchall()
-        db.close()
-        for user in users:
-            user["birth"] = user["birth"].strftime("%Y-%m-%d")
-
-        response["data"] = users
-        return jsonify(response)
+        users = UserModel.query.filter(UserModel.deleted.isnot(True)).all()
+        return jsonify({'data': list(map(lambda user: user.serialize(), users))})
 
     def post(self):
-        db, cursor = self.db_init()
         arg = parser.parse_args()
         user = {
             "name": arg["name"],
@@ -98,14 +88,10 @@ class Users(Resource):
             "birth": arg["birth"] or "1900-01-01",
             "note": arg["note"],
         }
-        sql = """Insert into flask_demo.users 
-                (name, gender, birth, note) 
-                values('{}', '{}', '{}', '{}')""".format(
-            user["name"], user["gender"], user["birth"], user["note"]
-        )
-        result = cursor.execute(sql)
-        db.commit()
-        db.close()
-        response["result"] = True if result == 1 else False
 
-        return jsonify(response)
+        new_user = UserModel(name=user["name"], 
+        gender=user["gender"], birth=user["birth"], note=user["note"])
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({'msg': 'success'})
