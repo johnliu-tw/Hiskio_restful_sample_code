@@ -93,6 +93,13 @@ def withdraw(account_number):
 def login():
     return render_template("login.html")
 
+@app.route('/FB_login', methods=['POST'])
+def FB_login():
+    userID = request.values['userID']
+    accessToken = request.values['accessToken']
+    print(userID, accessToken)
+    return 'success'
+
 def get_account(account_number):
     db = pymysql.connect(DB_HOST, DB_USER, DB_PASSWORD, DB_SCHEMA)
     cursor = db.cursor(pymysql.cursors.DictCursor)
