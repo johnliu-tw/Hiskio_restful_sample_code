@@ -1,6 +1,6 @@
 from resources.user import User, Users
 from resources.account import Account, Accounts
-from flask import jsonify, request
+from flask import jsonify, request, render_template
 from flask_restful import Api, Resource
 import pymysql
 import flask
@@ -37,11 +37,12 @@ response = {"code": 200, "msg": "success"}
 #         'msg': type(error).__name__
 #     }
 
-# # 簡單的驗證授權機制
+# 簡單的驗證授權機制
 # @app.before_request
 # def auth():
 #     token = request.headers.get('auth')
-#     user_id = request.args.get('user_id', None)
+#     user_id = request.get_json()['user_id']
+#     # user_id = request.args.get('user_id', None)
 #     valid_token = jwt.encode({'user_id': user_id}, 'password', algorithm='HS256').decode('utf-8')
 #     if token == valid_token:
 #         pass
@@ -87,6 +88,10 @@ def withdraw(account_number):
         response["result"] = True if result == 1 else False
 
     return jsonify(response)
+
+@app.route('/login', methods=['GET'])
+def login():
+    return render_template("login.html")
 
 def get_account(account_number):
     db = pymysql.connect(DB_HOST, DB_USER, DB_PASSWORD, DB_SCHEMA)
