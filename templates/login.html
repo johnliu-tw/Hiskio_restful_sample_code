@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Facebook Login JavaScript Example</title>
+<title>Login</title>
 <meta charset="UTF-8">
+<meta name="google-signin-client_id" content="33284079700-hvas6n95hilactf0m1ch2tjpscv3pvqm.apps.googleusercontent.com">
 </head>
 <body>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 <script>
 
   function statusChangeCallback(response) {  // Called with the results from FB.getLoginStatus().
-    console.log('statusChangeCallback');
     console.log(response);                   // The current login status of the person.
     if (response.status === 'connected') {   // Logged into your webpage and Facebook.
       testAPI(response);  
@@ -50,10 +50,16 @@
   }
 
 </script>
+<script>
+  function onSignIn(googleUser) {
+    var profile = googleUser.getAuthResponse(true)
+    console.log(profile)
+  }
+</script>
 
 
 <!-- The JS SDK Login Button -->
-
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
 <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
 </fb:login-button>
 
@@ -62,5 +68,6 @@
 
 <!-- Load the JS SDK asynchronously -->
 <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 </body>
 </html>
