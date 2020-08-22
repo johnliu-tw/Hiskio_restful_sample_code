@@ -111,4 +111,4 @@ def get_account(account_number):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3333)
+    app.run(host="localhost", port=443, ssl_context=('localhost.crt', 'localhost.key'))
