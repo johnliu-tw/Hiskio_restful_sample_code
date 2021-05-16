@@ -6,7 +6,7 @@ import pymysql
 import flask
 import os
 import jwt
-from server import app
+from server import app, socketio, emit
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -98,6 +98,25 @@ def FB_login():
     userID = request.values['userID']
     accessToken = request.values['accessToken']
     print(userID, accessToken)
+    return 'success'
+
+@app.route('/websocket', methods=['GET'])
+def websocket():
+    return render_template("websocket.html")
+
+@socketio.on('connect')
+def test_connect():
+    emit('chatting',  {'message':'確認以連結'})
+    
+@socketio.on('chatting')
+def received(data):
+    print('收到訊息: ' + data['message'])
+
+@app.route("/chat", methods=['POST'])
+def chat():
+    message = request.json.get("message", 0)
+    print(message)
+    socketio.emit('chatting', {'message': message})
     return 'success'
 
 def get_account(account_number):
