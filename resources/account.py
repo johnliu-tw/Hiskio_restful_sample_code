@@ -25,6 +25,25 @@ class Account(Resource):
         return db, cursor
 
     def get(self, id):
+        """
+            更新特定 User
+            ---
+            tags:
+            - Account
+            description: 獲取 Account 資料
+            produces:
+            - application/xml
+            - application/json
+            parameters:
+            - in: path
+              name: id
+              type: integer
+              description: account 的id
+              required: true
+            responses:
+                200:
+                    description: 執行成功
+        """
         db, cursor = self.db_init()
         sql = """Select * FROM api.accounts Where id = {} and deleted is not  True""".format(id)
         cursor.execute(sql)

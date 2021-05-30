@@ -28,6 +28,27 @@ class User(Resource):
         return db, cursor
 
     def get(self, id):
+        """
+            獲取特定 User
+            ---
+            tags:
+            - User
+            description: 有啟動軟刪除機制，小於 10 的 id 都是系統測試用 id
+            produces:
+            - application/xml
+            - application/json
+            parameters:
+            - in: path
+              name: id
+              type: integer
+              description: user 的 id
+              required: true
+            responses:
+                200:
+                    description: 正確的資料
+                500:
+                    description: 沒有找到對應的 user
+        """
         # db, cursor = self.db_init()
         # sql = """Select * FROM flask_demo.users Where id = {} and deleted is not True""".format(id)
         # cursor.execute(sql)
@@ -38,6 +59,34 @@ class User(Resource):
         return jsonify({'data': user.serialize()})
 
     def patch(self, id):
+        """
+            更新特定 User
+            ---
+            tags:
+            - User
+            description: 只能更新 name
+            produces:
+            - application/xml
+            - application/json
+            parameters:
+            - in: path
+              name: id
+              type: integer
+              description: user 的id
+              required: true
+            - in: body
+              name: name
+              type: string
+              description: user 的名字
+              required: true
+            responses:
+                200:
+                    description: 已更新
+                500:
+                    description: 更新失敗
+        """
+
+
         arg = parser.parse_args()
         # user = {
         #     "name": arg["name"],
